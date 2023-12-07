@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <limits>
 using namespace std;
 //colores de texto
 #define RED     "\x1b[31m"
@@ -32,6 +33,8 @@ struct Estadisticas {
 		{}
 };
 //Metodos y funciones
+int getCasilla(char);
+bool validanumero(int);
 void configuracionInicial();
 char getJugarDeNuevo();
 char getJugador();
@@ -65,7 +68,35 @@ int main() {
    
 
 }
+int getCasilla(char jugadorActual){
+	while (true) {
+		int opc;
+        system("clear");
+		imprimirTablero();
+        cout << BLUE << "Turno del jugador:" << jugadorActual << RESET << endl;
+        cout << "Selecciona una casilla del tablero ó 0 para cancelar partida: ";
 
+        if (cin >> opc) {
+            // Verificar si la entrada es un número válido
+            if (opc >= 0 && opc <= 9) {
+                break;  // Salir del bucle si la entrada es válida
+            } else {
+                 //cout << "Opción no válida. Debe ingresar un número del 1 al 9" << endl;
+				 cout << RED << BG_WHITE << "Opción no válida. Debe ingresar un número del 1 al 9" << RESET << endl;
+            cin.clear();  // Limpiar el estado de error
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Desca
+            }
+        } else {
+            cout << RED << BG_WHITE << "Opción no válida. Debe ingresar un número." << RESET << endl;
+            cin.clear();  // Limpiar el estado de error
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Descartar la entrada incorrecta
+        }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Limpiar el buffer antes de continuar
+    }
+            
+
+}
 void muestraInstrucciones(){
 	bool bandera;
     bandera = true;
@@ -180,42 +211,33 @@ char getJugador(){
 
 }
 //funcion que le pregunta al usuario si desea jugar de nuevo y hace validaciones de las respuestas
-char getJugarDeNuevo(){
-    bool bandera;
-    bandera = true;
-    char opc;
-    do{
-        cout<<"\t¿Desea jugar otra partida? S/N"<<endl;
-        cin>>opc;
-        if(opc=='S'|| opc=='s'|| opc=='N' || opc=='n')
-        bandera=false;
-        else{
-            cout << RED<<BG_WHITE<<"Opción no valida" << RESET << endl;
-            cin.clear();
-	        cin.ignore();
-	        cin.get();
+
+char getJugarDeNuevo() {
+	string entrada;
+    do {
+        cout << "\t¿Desea jugar otra partida? S/N" << endl;
+		 // Leer toda la línea de entrada del usuario
+        if (getline(cin, entrada)) {
+			 // Verificar si la longitud de la entrada es igual a 1 (un solo carácter)
+            if (entrada.length() == 1) {
+				 // Tomar el primer carácter y convertir a mayúsculas
+                char opc = toupper(entrada[0]);
+				//Verificar si el carácter resultante es 'S' o 'N'
+                if (opc == 'S' || opc == 'N') {
+                    // Opción válida, salir del ciclo
+                    return opc;
+                }
+            }
         }
-    }while(bandera);
-    switch (opc)
-    {
-    case 'N':
-        opc = 'N';
-        break;
-    
-    case 'n':
-        opc = 'N';
-        break;
-    case 'S':
-        opc = 'S';
-        break;
-    case 's':
-        opc = 'S';
-        break;
-    }
 
-   return opc;
+        cout << RED<<BG_WHITE<<"Opción no valida " << RESET << endl;
 
+    } while (true);
+	// Este retorno no debería alcanzarse
+
+    return '\0'; 
 }
+
 //metodo que muestra el menu principal
 void menuPrincipal(){
 	int opcionJuego;
@@ -452,11 +474,7 @@ void jugarHumanoVsHumano(Estadisticas& estadisticas) {
 	    char jugadorActual = 'X';
         //inicia la partida
         while(true){
-            system("clear");
-		    imprimirTablero();
-		    cout<<BLUE<<"Turno del jugador:"<<jugadorActual<<RESET<<endl;
-		    cout<<"Selecciona una casilla del tablero ó 0 para cancelar partida: ";
-		    cin >> opc;
+			opc=getCasilla(jugadorActual);
 		    if (opc == 0) {
 		    	estadisticas.partidasCanceladas++;
                 cout << GREEN <<BG_WHITE <<"! Partida Cancelada !" <<RESET;
@@ -465,11 +483,6 @@ void jugarHumanoVsHumano(Estadisticas& estadisticas) {
 	            cin.get();
 			    break;
 		    }
-		    while(opc < 1 || opc > 9) {
-                cout << RED<<BG_WHITE<<"Número de casilla inválido." << RESET << endl;
-                cout << "selecciona una casilla del tablero :";
-                cin >> opc;
-            }
 		    int fila = (opc - 1) / 3;
 		    int columna = (opc - 1) % 3;
             //una vez que se validaron las opciones de la casilla , vamos a realizar la jugada
@@ -527,27 +540,25 @@ void jugarContraMaquina(Estadisticas& estadisticas) {
 	    char jugadorActual = getJugador();
         //ciclo de la partida
 	    while (true) {
-            system("clear");
-            string nivel;
-            if (dificultad==1)
-                nivel="Fácil";
-            else
-                nivel="Difícil";
-            cout<< BLUE<<"Modo:"<<nivel<<RESET<<endl;
-		    imprimirTablero();
-		    int opc;
+			int opc;
 		    if (jugadorActual == 'X') {
-			    cout <<BLUE<<"Turno del jugador:"<<jugadorActual<<RESET<<endl;
-			    cout << "Selecciona una casilla del tablero ó 0 para cancelar partida: ";
-			    cin >> opc;
-			    if (opc == 0) {
-				    estadisticas.partidasCanceladas++;
+				system("clear");
+           			string nivel;
+            		if (dificultad==1)
+                		nivel="Fácil";
+            		else
+                		nivel="Difícil";
+            		cout<< BLUE<<"Modo:"<<nivel<<RESET<<endl;
+		   		 	imprimirTablero();
+		    		
+				opc=getCasilla(jugadorActual);
+				if (opc == 0){
                     cout << GREEN <<BG_WHITE <<"! Partida Cancelada !" <<RESET;
 				    cin.clear();
 	                cin.ignore();
 	                cin.get();
 				    break;
-			    }
+					}
 			    while(opc < 1 || opc > 9) {
                     cout << RED<<BG_WHITE<<"Número de casilla inválido." << RESET << endl;
                     cout << "selecciona una casilla del tablero :";
@@ -563,9 +574,17 @@ void jugarContraMaquina(Estadisticas& estadisticas) {
 	                cin.ignore();
 	                cin.get();
 				    continue;
-			    }
-		    } else {
+			    }  	
+		    }
+			else {
                 //turno de la maquina
+				string nivel;
+            	if (dificultad==1)
+                	nivel="Fácil";
+            	else
+                	nivel="Difícil";
+            	cout<< BLUE<<"Modo:"<<nivel<<RESET<<endl;
+		    	imprimirTablero();
 			    if (dificultad == 1) 
 				    jugadaMaquinaFacil();
 			    else 
